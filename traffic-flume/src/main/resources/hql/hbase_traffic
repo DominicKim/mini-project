@@ -1,0 +1,25 @@
+CREATE TABLE hbase_traffic(
+	car string COMMENT 'from deserializer',
+	date string COMMENT 'from deserializer',
+	hour string COMMENT 'from deserializer',
+	min string COMMENT 'from deserializer',
+	road string COMMENT 'from deserializer',
+	cam string COMMENT 'from deserializer',
+	speed string COMMENT 'from deserializer',
+	overspeed string COMMENT 'from deserializer')
+ROW FORMAT SERDE 'com.nexr.ndap.hbase.HBaseSerDe'
+STORED BY 'com.nexr.ndap.hbase.HBaseStorageHandler'
+WITH SERDEPROPERTIES (
+	'hbase.rowkey.unique'='false',
+	'serialization.format'='1',
+	'hbase.columns.mapping'=':subject,:range,cf:0,cf:1,cf:2,cf:3,cf:4,cf:5')
+LOCATION
+	'hdfs://PSEDU2:9000/user/hive/warehouse/dominic.db/hbase_traffic'
+TBLPROPERTIES ('hbase.table.default.storage.type'='binary',
+	'ndap.hbase.storageType'='HBASE',
+	'hbase.table.block_size'='128k',
+	'hbase.table.compression.codec'='snappy',
+	'hbase.table.name'='hbase_traffic',
+	'ndap.hbase.rowKeys'='car,date',
+	'transient_lastDdlTime'='1377849742',
+	'ndap.hbase.columns'='hour,min,road,cam,speed,overspeed')
