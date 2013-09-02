@@ -1,4 +1,4 @@
-CREATE EXTERNAL TABLE dominic.tbl_traffic (
+CREATE EXTERNAL TABLE dominic.hive_traffic (
 	min STRING,
 	road STRING,    
 	cam STRING,
