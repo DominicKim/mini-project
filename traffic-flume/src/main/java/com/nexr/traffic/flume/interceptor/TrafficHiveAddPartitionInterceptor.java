@@ -52,9 +52,9 @@ public class TrafficHiveAddPartitionInterceptor implements Interceptor {
 	public Event intercept(Event event) {
 		if (event != null) {
 			String date = event.getHeaders().get(TrafficConstants.HEADER_DATE);
-			String hour = event.getHeaders().get(TrafficConstants.HEADER_HOUR);
-			String partitionKey = date + PARTITION_DELIMITER + hour;
-
+			String road = event.getHeaders().get(TrafficConstants.HEADER_ROAD);	
+			String partitionKey = date + PARTITION_DELIMITER + road;
+			
 			if (!(this.partitionCache.contains(partitionKey))) {
 				logger.debug("add new hive partitionKey : " + partitionKey);
 				addPartition(partitionKey);
@@ -68,7 +68,7 @@ public class TrafficHiveAddPartitionInterceptor implements Interceptor {
 	    String changeDbQuery = String.format("USE %s", this.hiveDatabase);
 
 	    String[] partition = partitionKey.split(",");
-	    String query = String.format("ALTER TABLE %s ADD IF NOT EXISTS PARTITION (date='%s', hour='%s') LOCATION '%s%s/%s'",
+	    String query = String.format("ALTER TABLE %s ADD IF NOT EXISTS PARTITION (date='%s', road='%s') LOCATION '%s%s/%s'",
 					    			this.hiveTableName,
 					    			partition[0], partition[1],
 					    			this.hdfsPath, partition[0], partition[1]);

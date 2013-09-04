@@ -37,8 +37,9 @@ public class TrafficLogExtractInterceptorTest {
         event = interceptor.intercept(event);
         
         Assert.assertEquals("2013-08-19", event.getHeaders().get(TrafficConstants.HEADER_DATE));
-        Assert.assertEquals("19", event.getHeaders().get(TrafficConstants.HEADER_HOUR));
-        Assert.assertEquals("43,ROAD_1,CAM_34,69YK9562^72|94AY3251^79|94TP2308^71|65QU0384^67", new String(event.getBody()));
+        Assert.assertEquals("1", event.getHeaders().get(TrafficConstants.HEADER_ROAD));
+        Assert.assertEquals("19,43,34,69YK9562^72|94AY3251^79|94TP2308^71|65QU0384^67", new String(event.getBody()));
+        
 	}
 
 }

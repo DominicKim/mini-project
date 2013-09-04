@@ -17,7 +17,7 @@ public class TrafficLogExtractInterceptor implements Interceptor {
 	private final String FIELD_DELIMITER = ",";
 	private final String TIMESTAMP_DELIMITER = " ";
 	private final String TIME_DELIMITER = ":";
-	
+		
 	@Override
 	public void initialize() {
 		// no-op
@@ -31,11 +31,14 @@ public class TrafficLogExtractInterceptor implements Interceptor {
 	    String[] timeStr = dateTimeStr[1].split(TIME_DELIMITER);
 
 	    event.getHeaders().put(TrafficConstants.HEADER_DATE, dateTimeStr[0]);
-	    event.getHeaders().put(TrafficConstants.HEADER_HOUR, timeStr[0]);
+	    event.getHeaders().put(TrafficConstants.HEADER_ROAD, fields[1].split("_")[1]);
 
-	    String min = timeStr[1];
-
-	    String tempBody = min + FIELD_DELIMITER + fields[1] + FIELD_DELIMITER + fields[2] + FIELD_DELIMITER + fields[3];
+	    String cam = fields[2].split("_")[1];
+	    String carInfo = fields[3];
+	    
+	    // hour, min, cam, car_info
+	    String tempBody = timeStr[0] + FIELD_DELIMITER + timeStr[1] + FIELD_DELIMITER + cam + FIELD_DELIMITER + carInfo;
+	    
 	    event.setBody(tempBody.getBytes());
 	    return event;
 	}

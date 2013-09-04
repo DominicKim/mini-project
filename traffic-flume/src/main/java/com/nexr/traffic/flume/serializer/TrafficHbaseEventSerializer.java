@@ -25,15 +25,12 @@ public class TrafficHbaseEventSerializer implements HbaseEventSerializer {
 	private static final byte[] QUALIFIER_ROAD = Bytes.toBytes("2");
 	private static final byte[] QUALIFIER_CAM = Bytes.toBytes("3");
 	private static final byte[] QUALIFIER_SPEED = Bytes.toBytes("4");
-	private static final byte[] QUALIFIER_OVERSPEED = Bytes.toBytes("5");
-	private static final byte[] OVER = Bytes.toBytes("over");
-	private static final byte[] UNDER = Bytes.toBytes("under");
 	
 	private static final String OVERSPEED = "overspeed";
 	private static final Integer DEFAILT_OVERSPEED = 80;
 	
 	private String date;
-	private String hour;
+	private int road;
 	private String body;
 	private byte[] cf;
 	private int overspeed;
@@ -53,7 +50,7 @@ public class TrafficHbaseEventSerializer implements HbaseEventSerializer {
 	public void initialize(Event event, byte[] columnFamily) {
 		if (event != null) {
 			this.date = ((String) event.getHeaders().get(TrafficConstants.HEADER_DATE));
-			this.hour = ((String) event.getHeaders().get(TrafficConstants.HEADER_HOUR));
+			this.road = Integer.parseInt(event.getHeaders().get(TrafficConstants.HEADER_ROAD));
 			this.body = new String(event.getBody());
 		} else {
 			logger.error("Event is null");
@@ -70,33 +67,26 @@ public class TrafficHbaseEventSerializer implements HbaseEventSerializer {
 
 		if (this.body != null) {
 			String[] log = this.body.split(",");
-			String min = log[0];
-			String road = log[1];
-			String cam = log[2];
+			int hour = Integer.parseInt(log[0]);
+			int min = Integer.parseInt(log[1]);
+			int cam = Integer.parseInt(log[2]);
 			String[] carInfos = log[3].split("\\|");
 
 			for (String carInfo : carInfos) {
 				String[] carNumCarSpeed = carInfo.split("\\^");
 				String carNum = carNumCarSpeed[0];
-				String carspeed = carNumCarSpeed[1];
+				int carspeed = Integer.parseInt(carNumCarSpeed[1]);
 
 				String rowKey = carNum + "|" + this.date;
 				Put put = new Put(Bytes.toBytes(rowKey));
-				put.add(this.cf, QUALIFIER_HOUR, Bytes.toBytes(this.hour));
+				put.add(this.cf, QUALIFIER_HOUR, Bytes.toBytes(hour));
 				put.add(this.cf, QUALIFIER_MIN, Bytes.toBytes(min));
-				put.add(this.cf, QUALIFIER_ROAD, Bytes.toBytes(road));
+				put.add(this.cf, QUALIFIER_ROAD, Bytes.toBytes(this.road));
 				put.add(this.cf, QUALIFIER_CAM, Bytes.toBytes(cam));
 				put.add(this.cf, QUALIFIER_SPEED, Bytes.toBytes(carspeed));
 
-				if (Integer.parseInt(carspeed) > this.overspeed) {
-					put.add(this.cf, QUALIFIER_OVERSPEED, OVER);
-				} else {
-					put.add(this.cf, QUALIFIER_OVERSPEED, UNDER);
-				}
-
 				rows.add(put);
 			}
-
 		}
 
 		return rows;

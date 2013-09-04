@@ -30,7 +30,7 @@ public class TrafficHbaseOverspeedEventSerializer implements HbaseEventSerialize
 	private static final Integer DEFAILT_OVERSPEED = 80;
 	
 	private String date;
-	private String hour;
+	private int road;
 	private String body;
 	private byte[] cf;
 	private int overspeed;
@@ -50,7 +50,7 @@ public class TrafficHbaseOverspeedEventSerializer implements HbaseEventSerialize
 	public void initialize(Event event, byte[] columnFamily) {
 		if (event != null) {
 			this.date = ((String) event.getHeaders().get(TrafficConstants.HEADER_DATE));
-			this.hour = ((String) event.getHeaders().get(TrafficConstants.HEADER_HOUR));
+			this.road = Integer.parseInt(event.getHeaders().get(TrafficConstants.HEADER_ROAD));
 			this.body = new String(event.getBody());
 		} else {
 			logger.error("Event is null");
@@ -67,25 +67,25 @@ public class TrafficHbaseOverspeedEventSerializer implements HbaseEventSerialize
 
 		if (this.body != null) {
 			String[] log = this.body.split(",");
-			String min = log[0];
-			String road = log[1];
-			String cam = log[2];
+			int hour = Integer.parseInt(log[0]);
+			int min = Integer.parseInt(log[1]);
+			int cam = Integer.parseInt(log[2]);
 			String[] carInfos = log[3].split("\\|");
 
 			for (String carInfo : carInfos) {
 				String[] carNumCarSpeed = carInfo.split("\\^");
 				String carNum = carNumCarSpeed[0];
-				String carspeed = carNumCarSpeed[1];
+				int carspeed = Integer.parseInt(carNumCarSpeed[1]);
 
-				if (Integer.parseInt(carspeed) > this.overspeed) {
+				if ( carspeed > this.overspeed) {
 					String rowKey = this.date + "|" + carNum;
 					Put put = new Put(Bytes.toBytes(rowKey));
-					put.add(this.cf, QUALIFIER_HOUR, Bytes.toBytes(this.hour));
+					put.add(this.cf, QUALIFIER_HOUR, Bytes.toBytes(hour));
 					put.add(this.cf, QUALIFIER_MIN, Bytes.toBytes(min));
-					put.add(this.cf, QUALIFIER_ROAD, Bytes.toBytes(road));
+					put.add(this.cf, QUALIFIER_ROAD, Bytes.toBytes(this.road));
 					put.add(this.cf, QUALIFIER_CAM, Bytes.toBytes(cam));
 					put.add(this.cf, QUALIFIER_SPEED, Bytes.toBytes(carspeed));
-					
+	
 					rows.add(put);
 				}
 			}
